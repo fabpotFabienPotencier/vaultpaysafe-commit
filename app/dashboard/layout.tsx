@@ -6,16 +6,16 @@ import { useEffect } from "react";
 import Link from "next/link";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { currentUser, logout } = useBank();
+  const { currentUser, logout, isLoaded } = useBank();
   const router = useRouter();
 
   useEffect(() => {
-    if (!currentUser) {
+    if (isLoaded && !currentUser) {
       router.push("/login");
     }
-  }, [currentUser, router]);
+  }, [currentUser, isLoaded, router]);
 
-  if (!currentUser) return null;
+  if (!isLoaded || !currentUser) return null;
 
   return (
     <>
@@ -39,15 +39,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <Link href="/dashboard" className="flex flex-col items-center hover:bg-surface-container rounded-full p-2 text-secondary scale-110 active:scale-90 transition-transform duration-150">
           <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>account_balance_wallet</span>
         </Link>
-        <button className="flex flex-col items-center hover:bg-surface-container rounded-full p-2 text-on-surface-variant opacity-50 active:scale-90 transition-transform duration-150">
+        <Link href="/dashboard/transfer" className="flex flex-col items-center hover:bg-surface-container rounded-full p-2 text-on-surface-variant active:scale-90 transition-transform duration-150">
           <span className="material-symbols-outlined">swap_horiz</span>
-        </button>
-        <button className="flex flex-col items-center hover:bg-surface-container rounded-full p-2 text-on-surface-variant opacity-50 active:scale-90 transition-transform duration-150">
+        </Link>
+        <Link href="/dashboard/analytics" className="flex flex-col items-center hover:bg-surface-container rounded-full p-2 text-on-surface-variant active:scale-90 transition-transform duration-150">
           <span className="material-symbols-outlined">insert_chart</span>
-        </button>
-        <button className="flex flex-col items-center hover:bg-surface-container rounded-full p-2 text-on-surface-variant opacity-50 active:scale-90 transition-transform duration-150">
+        </Link>
+        <Link href="/dashboard/profile" className="flex flex-col items-center hover:bg-surface-container rounded-full p-2 text-on-surface-variant active:scale-90 transition-transform duration-150">
           <span className="material-symbols-outlined">person</span>
-        </button>
+        </Link>
       </nav>
     </>
   );

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Search, CreditCard, Building, Wallet, Lock, Unlock } from "lucide-react";
 
 export default function AdminDashboard() {
-  const { users, loadFunds, toggleWithdrawalLock, assignVirtualAccount, generateVirtualCard } = useBank();
+  const { users, loadFunds, toggleWithdrawalLock, assignVirtualAccount, generateVirtualCard, addTransaction } = useBank();
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredUsers = users.filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -38,6 +38,7 @@ export default function AdminDashboard() {
             onToggleLock={toggleWithdrawalLock}
             onAssignAccount={assignVirtualAccount}
             onGenerateCard={generateVirtualCard}
+            onAddTransaction={addTransaction}
           />
         ))}
       </div>
@@ -45,12 +46,13 @@ export default function AdminDashboard() {
   );
 }
 
-function UserAdminCard({ user, onLoadFunds, onToggleLock, onAssignAccount, onGenerateCard }: { 
+function UserAdminCard({ user, onLoadFunds, onToggleLock, onAssignAccount, onGenerateCard, onAddTransaction }: { 
   user: User, 
   onLoadFunds: any, 
   onToggleLock: any, 
   onAssignAccount: any, 
-  onGenerateCard: any 
+  onGenerateCard: any,
+  onAddTransaction: any
 }) {
   return (
     <div className="bg-white p-6 rounded-[24px] border border-[#E7E8EA] flex flex-col md:flex-row gap-8">
@@ -87,7 +89,15 @@ function UserAdminCard({ user, onLoadFunds, onToggleLock, onAssignAccount, onGen
       <div className="w-full md:w-64 flex flex-col gap-3 justify-center">
         <button onClick={() => {
           const amount = prompt("Enter amount to load (USD):");
-          if (amount && !isNaN(Number(amount))) onLoadFunds(user.id, 'USD', Number(amount));
+          if (amount && !isNaN(Number(amount))) {
+            onLoadFunds(user.id, 'USD', Number(amount));
+            onAddTransaction(user.id, {
+              type: 'Deposit',
+              amount: Number(amount),
+              currency: 'USD',
+              description: 'Admin Manual Load'
+            });
+          }
         }} className="w-full bg-[#F6F7F8] hover:bg-[#E7E8EA] text-foreground px-4 py-2.5 rounded-full text-sm font-medium transition-colors flex justify-center items-center gap-2">
           <Wallet className="w-4 h-4" /> Load USD
         </button>

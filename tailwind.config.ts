@@ -59,6 +59,10 @@ const config: Config = {
         // Additional brand accents for VaultPaySafe specifics
         "accent-green": "#0A8953",
         "accent-red": "#ba1a1a",
+        "accent-blue": "#075CF2",
+        "accent-blueSoft": "#DDE8FF",
+        "muted": "#70757D",
+        "foreground": "#101112",
       },
       borderRadius: {
         "DEFAULT": "1rem",

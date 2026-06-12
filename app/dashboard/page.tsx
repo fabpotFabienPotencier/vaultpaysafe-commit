@@ -3,7 +3,7 @@
 import { useBank } from "../context/BankContext";
 
 export default function Dashboard() {
-  const { currentUser } = useBank();
+  const { currentUser, loadFunds, addTransaction } = useBank();
 
   if (!currentUser) return null;
 
@@ -13,7 +13,19 @@ export default function Dashboard() {
     if (currentUser.withdrawalsLocked) {
       alert("Withdrawals are currently locked for your account. Please contact support.");
     } else {
-      alert("Withdrawal initiated successfully.");
+      const amount = prompt("Enter amount to withdraw (USD):");
+      if (amount && !isNaN(Number(amount)) && Number(amount) <= currentUser.balances.USD) {
+        loadFunds(currentUser.id, 'USD', -Number(amount));
+        addTransaction(currentUser.id, {
+          type: 'Withdrawal',
+          amount: Number(amount),
+          currency: 'USD',
+          description: 'ATM Withdrawal'
+        });
+        alert("Withdrawal initiated successfully.");
+      } else if (amount) {
+        alert("Invalid amount or insufficient funds.");
+      }
     }
   };
 
@@ -96,9 +108,56 @@ export default function Dashboard() {
           </div>
         ))}
 
-        <div className="border border-dashed border-outline-variant rounded-lg p-element-gap h-[150px] flex flex-col justify-center items-center text-center cursor-pointer hover:bg-surface-container-low transition-colors">
+        <button onClick={() => {
+          const amount = prompt("Enter amount to add (USD):");
+          if (amount && !isNaN(Number(amount))) {
+            loadFunds(currentUser.id, 'USD', Number(amount));
+            addTransaction(currentUser.id, {
+              type: 'Deposit',
+              amount: Number(amount),
+              currency: 'USD',
+              description: 'Manual Fund Deposit'
+            });
+          }
+        }} className="border border-dashed border-outline-variant rounded-lg p-element-gap h-[150px] flex flex-col justify-center items-center text-center cursor-pointer hover:bg-surface-container-low transition-colors w-full">
           <span className="material-symbols-outlined text-outline mb-2 text-3xl">add</span>
           <p className="text-on-surface-variant text-sm">Add Funds</p>
+        </button>
+      </section>
+
+      <section className="mt-section-margin">
+        <h2 className="font-section-header text-lg font-semibold mb-6">Recent Activity</h2>
+        <div className="flex flex-col">
+          {currentUser.transactions && currentUser.transactions.length > 0 ? (
+            currentUser.transactions.slice(0, 5).map((tx, idx) => (
+              <div key={tx.id} className="relative flex items-center justify-between py-4">
+                {idx !== currentUser.transactions.length - 1 && idx !== 4 && (
+                  <div className="absolute bottom-0 left-[24px] right-0 h-[0.5px] bg-outline-variant opacity-50"></div>
+                )}
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-secondary">
+                    <span className="material-symbols-outlined text-sm">
+                      {tx.type === 'Deposit' ? 'south_west' : tx.type === 'Withdrawal' ? 'north_east' : 'payments'}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <p className="font-medium text-sm">{tx.description || tx.type}</p>
+                    <p className="text-muted text-xs mt-0.5">
+                      {new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className={`font-mono text-sm font-semibold ${tx.type === 'Deposit' ? 'text-accent-green' : 'text-primary'}`}>
+                    {tx.type === 'Deposit' ? '+' : '-'}{tx.currency === 'USD' ? '$' : '€'}{tx.amount.toFixed(2)}
+                  </p>
+                  <p className="text-muted text-xs mt-0.5 uppercase tracking-widest">{tx.status}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-muted text-sm text-center py-8">No recent transactions.</p>
+          )}
         </div>
       </section>
 
